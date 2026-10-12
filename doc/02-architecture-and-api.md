@@ -68,17 +68,19 @@ sequenceDiagram
     participant DB as SQLite
     participant Worker
     participant CH as Cloud Hypervisor
-    Client->>API: POST /v1/vms + idempotency key
+
+    Client->>API: POST /v1/vms with idempotency key
     API->>API: Authenticate and validate
-    API->>DB: Record definition, operation, reservation
+    API->>DB: Record definition, operation, and reservation
     API->>Worker: Prepare VM definition
     Worker->>CH: Configure through local API
     CH-->>Worker: Result
     Worker-->>API: Observed result
     API->>DB: Persist outcome
     API-->>Client: 201 Created
-    Client->>API: POST /v1/vms/{id}/start
-    API->>DB: Claim operation; set Starting
+
+    Client->>API: POST start request for VM
+    API->>DB: Claim operation and set Starting
     API->>Worker: Start VM
     Worker->>CH: Boot request
     CH-->>Worker: Command result
